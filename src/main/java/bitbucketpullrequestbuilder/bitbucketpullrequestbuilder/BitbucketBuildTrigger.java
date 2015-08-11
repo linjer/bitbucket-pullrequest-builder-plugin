@@ -4,6 +4,7 @@ import antlr.ANTLRException;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.model.queue.QueueTaskFuture;
+import hudson.plugins.git.RevisionParameterAction;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import net.sf.json.JSONObject;
@@ -120,7 +121,7 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
     }
 
     public QueueTaskFuture<?> startJob(BitbucketCause cause) {
-        Map<String, ParameterValue> values = new HashMap<String, ParameterValue>();
+        Map<String, ParameterValue> values = this.getDefaultParameters();
         values.put("sourceBranch", new StringParameterValue("sourceBranch", cause.getSourceBranch()));
         values.put("targetBranch", new StringParameterValue("targetBranch", cause.getTargetBranch()));
         values.put("repositoryOwner", new StringParameterValue("repositoryOwner", cause.getRepositoryOwner()));
@@ -129,7 +130,7 @@ public class BitbucketBuildTrigger extends Trigger<AbstractProject<?, ?>> {
         values.put("destinationRepositoryOwner", new StringParameterValue("destinationRepositoryOwner", cause.getDestinationRepositoryOwner()));
         values.put("destinationRepositoryName", new StringParameterValue("destinationRepositoryName", cause.getDestinationRepositoryName()));
         values.put("pullRequestTitle", new StringParameterValue("pullRequestTitle", cause.getPullRequestTitle()));
-        return this.job.scheduleBuild2(0, cause, new ParametersAction(new ArrayList(values.values())));
+        return this.job.scheduleBuild2(0, cause, new ParametersAction(new ArrayList(values.values())), new RevisionParameterAction(cause.getSourceCommitHash()));
     }
 
     private Map<String, ParameterValue> getDefaultParameters() {
